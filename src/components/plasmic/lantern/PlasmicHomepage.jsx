@@ -13,7 +13,6 @@ import {
   classNames,
   createPlasmicElementProxy,
   deriveRenderOpts,
-  get as $stateGet,
   set as $stateSet,
   useDollarState
 } from "@plasmicapp/react-web";
@@ -23,17 +22,13 @@ import {
 } from "@plasmicapp/react-web/lib/host";
 import { usePlasmicDataSourceContext } from "@plasmicapp/data-sources-context";
 import { usePlasmicInvalidate } from "@plasmicapp/react-web/lib/data-sources";
+import { Timer } from "@plasmicpkgs/plasmic-basic-components";
 import { DataFetcher } from "@plasmicpkgs/plasmic-query";
-import { AntdMenu } from "@plasmicpkgs/antd5/skinny/registerMenu";
-import { AntdMenuItem } from "@plasmicpkgs/antd5/skinny/registerMenu";
 import Button from "../../Button"; // plasmic-import: q5yBY-eKZ0QK/component
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: 54HsYifXcmbnw5veKzJ3R2/styleTokensProvider
 import "@plasmicapp/react-web/lib/plasmic.css";
 import projectcss from "./plasmic.module.css"; // plasmic-import: 54HsYifXcmbnw5veKzJ3R2/projectcss
 import sty from "./PlasmicHomepage.module.css"; // plasmic-import: VO-JOznlsGEg/css
-import LayoutSidebarLeftExpandFilledIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__LayoutSidebarLeftExpandFilled"; // plasmic-import: 8xq8h5dl2Jnv/icon
-import Server2Icon from "../library_tabler_3_2_icons/icons/PlasmicIcon__Server2"; // plasmic-import: _gg3AL72Frso/icon
-import ReloadIcon from "../library_tabler_3_2_icons/icons/PlasmicIcon__Reload"; // plasmic-import: OQkgABOXtHPx/icon
 
 const emptyProxy = new Proxy(() => "", {
   get(_, prop) {
@@ -93,6 +88,25 @@ function PlasmicHomepage__RenderFunc(props) {
         type: "private",
         variableType: "boolean",
         initFunc: ({ $props, $state, $queries, $q, $ctx }) => false
+      },
+      {
+        path: "restApi",
+        type: "private",
+        variableType: "text",
+        initFunc: ({ $props, $state, $queries, $q, $ctx }) =>
+          (() => {
+            try {
+              return `${window.location.origin}/glances/api/4/`;
+            } catch (e) {
+              if (
+                e instanceof TypeError ||
+                e?.plasmicType === "PlasmicUndefinedDataError"
+              ) {
+                return ``;
+              }
+              throw e;
+            }
+          })()
       }
     ],
 
@@ -124,323 +138,135 @@ function PlasmicHomepage__RenderFunc(props) {
             styleTokensClassNames,
             sty.root
           )}
+          onLoad={async event => {
+            const $steps = {};
+            $steps["updateMenuOpened"] = true
+              ? (() => {
+                  const actionArgs = {
+                    variable: {
+                      objRoot: $state,
+                      variablePath: ["menuOpened"]
+                    },
+                    operation: 0
+                  };
+                  return (({ variable, value, startIndex, deleteCount }) => {
+                    if (!variable) {
+                      return;
+                    }
+                    const { objRoot, variablePath } = variable;
+                    $stateSet(objRoot, variablePath, value);
+                    return value;
+                  })?.apply(null, [actionArgs]);
+                })()
+              : undefined;
+            if (
+              $steps["updateMenuOpened"] != null &&
+              typeof $steps["updateMenuOpened"] === "object" &&
+              typeof $steps["updateMenuOpened"].then === "function"
+            ) {
+              $steps["updateMenuOpened"] = await $steps["updateMenuOpened"];
+            }
+          }}
         >
-          <DataFetcher
-            data-plasmic-name={"httpRestApiFetcher"}
-            data-plasmic-override={overrides.httpRestApiFetcher}
-            className={classNames("__wab_instance", sty.httpRestApiFetcher)}
-            dataName={"fetchedData"}
-            errorDisplay={
-              <DataCtxReader__>{$ctx => "Error fetching data"}</DataCtxReader__>
-            }
-            errorName={"fetchError"}
-            loadingDisplay={
-              <DataCtxReader__>
-                {$ctx => (
-                  <div
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.text___8HyXu
-                    )}
-                  >
-                    {"Loading..."}
-                  </div>
-                )}
-              </DataCtxReader__>
-            }
-            method={"GET"}
-            noLayout={false}
-            previewErrorDisplay={false}
-            previewSpinner={false}
-            url={(() => {
-              try {
-                return `${window.location.origin}/glances/api/4/all`;
-              } catch (e) {
-                if (
-                  e instanceof TypeError ||
-                  e?.plasmicType === "PlasmicUndefinedDataError"
-                ) {
-                  return undefined;
-                }
-                throw e;
-              }
-            })()}
-          >
-            <DataCtxReader__>
-              {$ctx => (
-                <div className={classNames(projectcss.all, sty.freeBox__cn35E)}>
-                  <AntdMenu
-                    data-plasmic-name={"menu"}
-                    data-plasmic-override={overrides.menu}
-                    className={classNames("__wab_instance", sty.menu)}
-                    mode={"vertical"}
-                    multiple={false}
-                    onSelect={async key => {
-                      const $steps = {};
-                      $steps["updateStateVariable"] = true
-                        ? (() => {
-                            const actionArgs = {};
-                            return (({
-                              variable,
-                              value,
-                              startIndex,
-                              deleteCount
-                            }) => {
-                              if (!variable) {
-                                return;
-                              }
-                              const { objRoot, variablePath } = variable;
-                              undefined;
-                            })?.apply(null, [actionArgs]);
-                          })()
-                        : undefined;
-                      if (
-                        $steps["updateStateVariable"] != null &&
-                        typeof $steps["updateStateVariable"] === "object" &&
-                        typeof $steps["updateStateVariable"].then === "function"
-                      ) {
-                        $steps["updateStateVariable"] =
-                          await $steps["updateStateVariable"];
+          <Timer
+            data-plasmic-name={"timer"}
+            data-plasmic-override={overrides.timer}
+            className={classNames("__wab_instance", sty.timer)}
+            intervalSeconds={2}
+            isRunning={true}
+            onTick={async () => {
+              const $steps = {};
+              $steps["refreshData"] = true
+                ? (() => {
+                    const actionArgs = {
+                      queryInvalidation: ["plasmic_refresh_all"]
+                    };
+                    return (async ({ queryInvalidation }) => {
+                      if (!queryInvalidation) {
+                        return;
                       }
-                    }}
-                  >
-                    <AntdMenuItem
-                      className={classNames(
-                        "__wab_instance",
-                        sty.menuItem___68Tn3
-                      )}
-                      key={"menuItemKey1"}
-                      onClick={async () => {
-                        const $steps = {};
-                        $steps["updateMenuOpened"] = true
-                          ? (() => {
-                              const actionArgs = {
-                                variable: {
-                                  objRoot: $state,
-                                  variablePath: ["menuOpened"]
-                                },
-                                operation: 4
-                              };
-                              return (({
-                                variable,
-                                value,
-                                startIndex,
-                                deleteCount
-                              }) => {
-                                if (!variable) {
-                                  return;
-                                }
-                                const { objRoot, variablePath } = variable;
-                                const oldValue = $stateGet(
-                                  objRoot,
-                                  variablePath
-                                );
-                                $stateSet(objRoot, variablePath, !oldValue);
-                                return !oldValue;
-                              })?.apply(null, [actionArgs]);
-                            })()
-                          : undefined;
-                        if (
-                          $steps["updateMenuOpened"] != null &&
-                          typeof $steps["updateMenuOpened"] === "object" &&
-                          typeof $steps["updateMenuOpened"].then === "function"
-                        ) {
-                          $steps["updateMenuOpened"] =
-                            await $steps["updateMenuOpened"];
-                        }
-                      }}
-                    >
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__in1Vq
-                        )}
-                      >
-                        <LayoutSidebarLeftExpandFilledIcon
-                          className={classNames(projectcss.all, sty.svg__iEjP)}
-                          role={"img"}
-                        />
+                      await plasmicInvalidate(queryInvalidation);
+                    })?.apply(null, [actionArgs]);
+                  })()
+                : undefined;
+              if (
+                $steps["refreshData"] != null &&
+                typeof $steps["refreshData"] === "object" &&
+                typeof $steps["refreshData"].then === "function"
+              ) {
+                $steps["refreshData"] = await $steps["refreshData"];
+              }
+            }}
+            runWhileEditing={false}
+          />
 
-                        {(() => {
-                          try {
-                            return $state.menuOpened;
-                          } catch (e) {
-                            if (
-                              e instanceof TypeError ||
-                              e?.plasmicType === "PlasmicUndefinedDataError"
-                            ) {
-                              return true;
-                            }
-                            throw e;
-                          }
-                        })() ? (
-                          <div
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.text__dinxe
-                            )}
-                          >
-                            <React.Fragment>
-                              <span
-                                className={
-                                  "plasmic_default__all plasmic_default__span"
-                                }
-                                style={{ color: "#FFFFFF" }}
-                              >
-                                {"Nodes"}
-                              </span>
-                            </React.Fragment>
-                          </div>
-                        ) : null}
-                      </div>
-                    </AntdMenuItem>
-                    {(_par =>
-                      !_par ? [] : Array.isArray(_par) ? _par : [_par])([
-                      2, 3, 4
-                    ]).map((__plasmic_item_0, __plasmic_idx_0) => {
-                      const currentItem = __plasmic_item_0;
-                      const currentIndex = __plasmic_idx_0;
-                      return (
-                        <AntdMenuItem
-                          className={classNames(
-                            "__wab_instance",
-                            sty.menuItem__tascB
-                          )}
-                          key={"menuItemKey1"}
-                        >
-                          <div
-                            className={classNames(
-                              projectcss.all,
-                              sty.freeBox__enmla
-                            )}
-                          >
-                            <Server2Icon
-                              className={classNames(
-                                projectcss.all,
-                                sty.svg__m54CU
-                              )}
-                              role={"img"}
-                            />
-
-                            {(() => {
-                              try {
-                                return $state.menuOpened;
-                              } catch (e) {
-                                if (
-                                  e instanceof TypeError ||
-                                  e?.plasmicType === "PlasmicUndefinedDataError"
-                                ) {
-                                  return true;
-                                }
-                                throw e;
-                              }
-                            })() ? (
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text___4IaCr
-                                )}
-                              >
-                                <React.Fragment>
-                                  <span
-                                    className={
-                                      "plasmic_default__all plasmic_default__span"
-                                    }
-                                    style={{ color: "#FFFFFF" }}
-                                  >
-                                    {"Node 1"}
-                                  </span>
-                                </React.Fragment>
-                              </div>
-                            ) : null}
-                          </div>
-                        </AntdMenuItem>
-                      );
-                    })}
-                  </AntdMenu>
-                  <div
-                    className={classNames(projectcss.all, sty.freeBox__l0Dp8)}
-                  >
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__eXFx5)}
-                    >
-                      <h1
-                        data-plasmic-name={"h1"}
-                        data-plasmic-override={overrides.h1}
-                        className={classNames(
-                          projectcss.all,
-                          projectcss.h1,
-                          projectcss.__wab_text,
-                          sty.h1
-                        )}
-                      >
-                        {"Lantern"}
-                      </h1>
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__cgj84
-                        )}
-                      >
-                        <ReloadIcon
-                          className={classNames(projectcss.all, sty.svg__v9WKh)}
-                          onClick={async event => {
-                            const $steps = {};
-                            $steps["refreshData"] = true
-                              ? (() => {
-                                  const actionArgs = {
-                                    queryInvalidation: ["plasmic_refresh_all"]
-                                  };
-                                  return (async ({ queryInvalidation }) => {
-                                    if (!queryInvalidation) {
-                                      return;
-                                    }
-                                    await plasmicInvalidate(queryInvalidation);
-                                  })?.apply(null, [actionArgs]);
-                                })()
-                              : undefined;
-                            if (
-                              $steps["refreshData"] != null &&
-                              typeof $steps["refreshData"] === "object" &&
-                              typeof $steps["refreshData"].then === "function"
-                            ) {
-                              $steps["refreshData"] =
-                                await $steps["refreshData"];
-                            }
-                          }}
-                          role={"img"}
-                        />
-                      </div>
-                    </div>
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__hOitr)}
-                    >
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__owmC0
-                        )}
-                      >
+          <div className={classNames(projectcss.all, sty.freeBox__kDdqt)}>
+            <h1
+              data-plasmic-name={"h1"}
+              data-plasmic-override={overrides.h1}
+              className={classNames(
+                projectcss.all,
+                projectcss.h1,
+                projectcss.h1__54HsY,
+                projectcss.__wab_text,
+                sty.h1
+              )}
+            >
+              {"Lantern"}
+            </h1>
+            <div className={classNames(projectcss.all, sty.freeBox__eRgrj)}>
+              <div className={classNames(projectcss.all, sty.freeBox__mkib4)}>
+                <DataFetcher
+                  className={classNames(
+                    "__wab_instance",
+                    sty.httpRestApiFetcher__pqDh
+                  )}
+                  dataName={"fetchedData"}
+                  errorDisplay={
+                    <DataCtxReader__>
+                      {$ctx => "Error fetching data"}
+                    </DataCtxReader__>
+                  }
+                  errorName={"fetchError"}
+                  loadingDisplay={
+                    <DataCtxReader__>{$ctx => "Loading..."}</DataCtxReader__>
+                  }
+                  method={"GET"}
+                  noLayout={false}
+                  url={(() => {
+                    try {
+                      return $state.restApi + "cpu";
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
+                >
+                  <DataCtxReader__>
+                    {$ctx => (
+                      <React.Fragment>
                         <div
                           className={classNames(
                             projectcss.all,
-                            sty.freeBox__faz1G
+                            sty.freeBox__gQl8
                           )}
                         >
                           <div
                             className={classNames(
                               projectcss.all,
-                              sty.freeBox__uuOEd
+                              sty.freeBox__wcfJw
                             )}
                           >
                             <div
                               className={classNames(
                                 projectcss.all,
                                 projectcss.__wab_text,
-                                sty.text__vbjfm
+                                sty.text__t5Ghm
                               )}
                             >
                               {"CPU"}
@@ -449,7 +275,7 @@ function PlasmicHomepage__RenderFunc(props) {
                               className={classNames(
                                 projectcss.all,
                                 projectcss.__wab_text,
-                                sty.text__bclo9
+                                sty.text__zutph
                               )}
                             >
                               <React.Fragment>
@@ -474,41 +300,150 @@ function PlasmicHomepage__RenderFunc(props) {
                               </React.Fragment>
                             </div>
                           </div>
-                          <div
+                          <DataFetcher
                             className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.text__etuC
+                              "__wab_instance",
+                              sty.httpRestApiFetcher__nrTdM
                             )}
+                            dataName={"fetchedData"}
+                            errorDisplay={
+                              <DataCtxReader__>
+                                {$ctx => "Error fetching data"}
+                              </DataCtxReader__>
+                            }
+                            errorName={"fetchError"}
+                            loadingDisplay={
+                              <DataCtxReader__>
+                                {$ctx => "Loading..."}
+                              </DataCtxReader__>
+                            }
+                            method={"GET"}
+                            noLayout={false}
+                            url={(() => {
+                              try {
+                                return $state.restApi + "quicklook";
+                              } catch (e) {
+                                if (
+                                  e instanceof TypeError ||
+                                  e?.plasmicType === "PlasmicUndefinedDataError"
+                                ) {
+                                  return undefined;
+                                }
+                                throw e;
+                              }
+                            })()}
                           >
-                            <React.Fragment>
-                              {$ctx.fetchedData.quicklook.cpu_name}
-                            </React.Fragment>
-                          </div>
+                            <DataCtxReader__>
+                              {$ctx => (
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__tIkKv
+                                  )}
+                                >
+                                  <React.Fragment>
+                                    {$ctx.fetchedData.cpu_name}
+                                  </React.Fragment>
+                                </div>
+                              )}
+                            </DataCtxReader__>
+                          </DataFetcher>
                         </div>
-                        <div
+                        <DataFetcher
                           className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text__q917F
+                            "__wab_instance",
+                            sty.httpRestApiFetcher__hDgFa
                           )}
+                          dataName={"fetchedData"}
+                          errorDisplay={
+                            <DataCtxReader__>
+                              {$ctx => "Error fetching data"}
+                            </DataCtxReader__>
+                          }
+                          errorName={"fetchError"}
+                          loadingDisplay={
+                            <DataCtxReader__>
+                              {$ctx => "Loading..."}
+                            </DataCtxReader__>
+                          }
+                          method={"GET"}
+                          noLayout={false}
+                          url={(() => {
+                            try {
+                              return $state.restApi + "sensors";
+                            } catch (e) {
+                              if (
+                                e instanceof TypeError ||
+                                e?.plasmicType === "PlasmicUndefinedDataError"
+                              ) {
+                                return undefined;
+                              }
+                              throw e;
+                            }
+                          })()}
                         >
-                          <React.Fragment>
-                            {$ctx.fetchedData.sensors[0].value + "\xB0C"}
-                          </React.Fragment>
-                        </div>
-                      </div>
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__tvBoU
-                        )}
-                      >
+                          <DataCtxReader__>
+                            {$ctx => (
+                              <div
+                                className={classNames(
+                                  projectcss.all,
+                                  projectcss.__wab_text,
+                                  sty.text___6L2Er
+                                )}
+                              >
+                                <React.Fragment>
+                                  {$ctx.fetchedData[0].value + "\xB0C"}
+                                </React.Fragment>
+                              </div>
+                            )}
+                          </DataCtxReader__>
+                        </DataFetcher>
+                      </React.Fragment>
+                    )}
+                  </DataCtxReader__>
+                </DataFetcher>
+              </div>
+              <div className={classNames(projectcss.all, sty.freeBox__gkyVn)}>
+                <DataFetcher
+                  className={classNames(
+                    "__wab_instance",
+                    sty.httpRestApiFetcher__wOYpM
+                  )}
+                  dataName={"fetchedData"}
+                  errorDisplay={
+                    <DataCtxReader__>
+                      {$ctx => "Error fetching data"}
+                    </DataCtxReader__>
+                  }
+                  errorName={"fetchError"}
+                  loadingDisplay={
+                    <DataCtxReader__>{$ctx => "Loading..."}</DataCtxReader__>
+                  }
+                  method={"GET"}
+                  noLayout={false}
+                  url={(() => {
+                    try {
+                      return $state.restApi + "mem";
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
+                >
+                  <DataCtxReader__>
+                    {$ctx => (
+                      <React.Fragment>
                         <div
                           className={classNames(
                             projectcss.all,
                             projectcss.__wab_text,
-                            sty.text__obkRd
+                            sty.text___5U5A8
                           )}
                         >
                           {"RAM"}
@@ -517,14 +452,14 @@ function PlasmicHomepage__RenderFunc(props) {
                           className={classNames(
                             projectcss.all,
                             projectcss.__wab_text,
-                            sty.text__w54U8
+                            sty.text__pciP6
                           )}
                         >
                           <React.Fragment>
                             {(() => {
                               try {
                                 return (
-                                  $ctx.fetchedData.mem.percent.toFixed(1) + "%"
+                                  $ctx.fetchedData.percent.toFixed(1) + "%"
                                 );
                               } catch (e) {
                                 if (
@@ -542,23 +477,56 @@ function PlasmicHomepage__RenderFunc(props) {
                           className={classNames(
                             projectcss.all,
                             projectcss.__wab_text,
-                            sty.text__yb6R5
+                            sty.text__wctR1
                           )}
                         >
-                          <React.Fragment>{`${($ctx.fetchedData.mem.used / 1073741824).toFixed(2)} / ${($ctx.fetchedData.mem.total / 1073741824).toFixed(2)} GB`}</React.Fragment>
+                          <React.Fragment>{`${($ctx.fetchedData.used / 1073741824).toFixed(2)} / ${($ctx.fetchedData.total / 1073741824).toFixed(2)} GB`}</React.Fragment>
                         </div>
-                      </div>
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox__fR8DQ
-                        )}
-                      >
+                      </React.Fragment>
+                    )}
+                  </DataCtxReader__>
+                </DataFetcher>
+              </div>
+              <div className={classNames(projectcss.all, sty.freeBox__xfPhy)}>
+                <DataFetcher
+                  className={classNames(
+                    "__wab_instance",
+                    sty.httpRestApiFetcher___7Aqt6
+                  )}
+                  dataName={"fetchedData"}
+                  errorDisplay={
+                    <DataCtxReader__>
+                      {$ctx => "Error fetching data"}
+                    </DataCtxReader__>
+                  }
+                  errorName={"fetchError"}
+                  loadingDisplay={
+                    <DataCtxReader__>{$ctx => "Loading..."}</DataCtxReader__>
+                  }
+                  method={"GET"}
+                  noLayout={false}
+                  url={(() => {
+                    try {
+                      return $state.restApi + "fs";
+                    } catch (e) {
+                      if (
+                        e instanceof TypeError ||
+                        e?.plasmicType === "PlasmicUndefinedDataError"
+                      ) {
+                        return undefined;
+                      }
+                      throw e;
+                    }
+                  })()}
+                >
+                  <DataCtxReader__>
+                    {$ctx => (
+                      <React.Fragment>
                         <div
                           className={classNames(
                             projectcss.all,
                             projectcss.__wab_text,
-                            sty.text__vSKxB
+                            sty.text__iXvU
                           )}
                         >
                           {"DISK"}
@@ -567,7 +535,7 @@ function PlasmicHomepage__RenderFunc(props) {
                           className={classNames(
                             projectcss.all,
                             projectcss.__wab_text,
-                            sty.text__rY4Qk
+                            sty.text__i3M8T
                           )}
                         >
                           <React.Fragment>
@@ -593,200 +561,228 @@ function PlasmicHomepage__RenderFunc(props) {
                           className={classNames(
                             projectcss.all,
                             projectcss.__wab_text,
-                            sty.text__ct4DH
+                            sty.text__nSyqy
                           )}
                         >
-                          <React.Fragment>{`${($ctx.fetchedData.fs[0].used / 1073741824).toFixed(2)} / ${($ctx.fetchedData.fs[0].size / 1073741824).toFixed(2)} GB`}</React.Fragment>
+                          <React.Fragment>{`${($ctx.fetchedData[0].used / 1073741824).toFixed(2)} / ${($ctx.fetchedData[0].size / 1073741824).toFixed(2)} GB`}</React.Fragment>
                         </div>
-                      </div>
-                    </div>
-                    <div
-                      className={classNames(projectcss.all, sty.freeBox__aqrj)}
-                    >
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          sty.freeBox___0GeAr
-                        )}
-                      >
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text__c4TlO
-                          )}
-                        >
-                          {"Containers"}
-                        </div>
-                        <div
-                          className={classNames(
-                            projectcss.all,
-                            projectcss.__wab_text,
-                            sty.text__p6VPp
-                          )}
-                        >
-                          <React.Fragment>
-                            {(() => {
-                              try {
-                                return undefined;
-                              } catch (e) {
-                                if (
-                                  e instanceof TypeError ||
-                                  e?.plasmicType === "PlasmicUndefinedDataError"
-                                ) {
-                                  return "5 running \u00b7 1 stopped";
-                                }
-                                throw e;
-                              }
-                            })()}
-                          </React.Fragment>
-                        </div>
-                      </div>
-                      {(_par =>
-                        !_par ? [] : Array.isArray(_par) ? _par : [_par])(
-                        (() => {
-                          try {
-                            return $ctx.fetchedData.containers;
-                          } catch (e) {
-                            if (
-                              e instanceof TypeError ||
-                              e?.plasmicType === "PlasmicUndefinedDataError"
-                            ) {
-                              return [];
-                            }
-                            throw e;
+                      </React.Fragment>
+                    )}
+                  </DataCtxReader__>
+                </DataFetcher>
+              </div>
+            </div>
+            <div className={classNames(projectcss.all, sty.freeBox__un2Gv)}>
+              <div className={classNames(projectcss.all, sty.freeBox__o17CH)}>
+                <div
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text___0OAz
+                  )}
+                >
+                  {"Containers"}
+                </div>
+                <div
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.__wab_text,
+                    sty.text__dSn2Q
+                  )}
+                >
+                  <React.Fragment>
+                    {(() => {
+                      try {
+                        return undefined;
+                      } catch (e) {
+                        if (
+                          e instanceof TypeError ||
+                          e?.plasmicType === "PlasmicUndefinedDataError"
+                        ) {
+                          return "5 running \u00b7 1 stopped";
+                        }
+                        throw e;
+                      }
+                    })()}
+                  </React.Fragment>
+                </div>
+              </div>
+              <DataFetcher
+                className={classNames(
+                  "__wab_instance",
+                  sty.httpRestApiFetcher___2Uxlg
+                )}
+                dataName={"fetchedData"}
+                errorDisplay={
+                  <DataCtxReader__>
+                    {$ctx => "Error fetching data"}
+                  </DataCtxReader__>
+                }
+                errorName={"fetchError"}
+                loadingDisplay={
+                  <DataCtxReader__>{$ctx => "Loading..."}</DataCtxReader__>
+                }
+                method={"GET"}
+                noLayout={false}
+                url={(() => {
+                  try {
+                    return $state.restApi + "containers";
+                  } catch (e) {
+                    if (
+                      e instanceof TypeError ||
+                      e?.plasmicType === "PlasmicUndefinedDataError"
+                    ) {
+                      return undefined;
+                    }
+                    throw e;
+                  }
+                })()}
+              >
+                <DataCtxReader__>
+                  {$ctx =>
+                    (_par =>
+                      !_par ? [] : Array.isArray(_par) ? _par : [_par])(
+                      (() => {
+                        try {
+                          return $ctx.fetchedData;
+                        } catch (e) {
+                          if (
+                            e instanceof TypeError ||
+                            e?.plasmicType === "PlasmicUndefinedDataError"
+                          ) {
+                            return [];
                           }
-                        })()
-                      ).map((__plasmic_item_0, __plasmic_idx_0) => {
-                        const currentItem = __plasmic_item_0;
-                        const currentIndex = __plasmic_idx_0;
-                        return (
+                          throw e;
+                        }
+                      })()
+                    ).map((__plasmic_item_0, __plasmic_idx_0) => {
+                      const currentItem = __plasmic_item_0;
+                      const currentIndex = __plasmic_idx_0;
+                      return (
+                        <div
+                          className={classNames(
+                            projectcss.all,
+                            sty.freeBox__oOyz6
+                          )}
+                          key={currentIndex}
+                        >
                           <div
                             className={classNames(
                               projectcss.all,
-                              sty.freeBox___3WHNx
+                              sty.freeBox__gcZBg
                             )}
-                            key={currentIndex}
                           >
+                            <Button
+                              data-plasmic-name={"button"}
+                              data-plasmic-override={overrides.button}
+                              className={classNames(
+                                "__wab_instance",
+                                sty.button
+                              )}
+                              color={(() => {
+                                try {
+                                  return currentItem.status === "restarting"
+                                    ? "warning"
+                                    : currentItem.status === "stopped"
+                                      ? "danger"
+                                      : "success";
+                                } catch (e) {
+                                  if (
+                                    e instanceof TypeError ||
+                                    e?.plasmicType ===
+                                      "PlasmicUndefinedDataError"
+                                  ) {
+                                    return [];
+                                  }
+                                  throw e;
+                                }
+                              })()}
+                              label={
+                                <div
+                                  className={classNames(
+                                    projectcss.all,
+                                    projectcss.__wab_text,
+                                    sty.text__eE29L
+                                  )}
+                                >
+                                  {""}
+                                </div>
+                              }
+                              roundedFull={true}
+                            />
+
                             <div
                               className={classNames(
                                 projectcss.all,
-                                sty.freeBox__ycCYu
+                                projectcss.__wab_text,
+                                sty.text__m8SHm
                               )}
                             >
-                              <Button
-                                data-plasmic-name={"button"}
-                                data-plasmic-override={overrides.button}
-                                className={classNames(
-                                  "__wab_instance",
-                                  sty.button
-                                )}
-                                color={(() => {
+                              <React.Fragment>
+                                {(() => {
                                   try {
-                                    return currentItem.status === "restarting"
-                                      ? "warning"
-                                      : currentItem.status === "stopped"
-                                        ? "danger"
-                                        : "success";
+                                    return currentItem.name;
                                   } catch (e) {
                                     if (
                                       e instanceof TypeError ||
                                       e?.plasmicType ===
                                         "PlasmicUndefinedDataError"
                                     ) {
-                                      return [];
+                                      return "jellyfin";
                                     }
                                     throw e;
                                   }
                                 })()}
-                                label={
-                                  <div
-                                    className={classNames(
-                                      projectcss.all,
-                                      projectcss.__wab_text,
-                                      sty.text__rqFss
-                                    )}
-                                  >
-                                    {""}
-                                  </div>
-                                }
-                                roundedFull={true}
-                              />
-
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__grPz4
-                                )}
-                              >
-                                <React.Fragment>
-                                  {(() => {
-                                    try {
-                                      return currentItem.name;
-                                    } catch (e) {
-                                      if (
-                                        e instanceof TypeError ||
-                                        e?.plasmicType ===
-                                          "PlasmicUndefinedDataError"
-                                      ) {
-                                        return "jellyfin";
-                                      }
-                                      throw e;
-                                    }
-                                  })()}
-                                </React.Fragment>
-                              </div>
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text___7FmMl
-                                )}
-                              >
-                                <React.Fragment>
-                                  {currentItem.cpu_percent !== null
-                                    ? currentItem.cpu_percent.toFixed(0) +
-                                      "% CPU"
-                                    : "--"}
-                                </React.Fragment>
-                              </div>
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__wibA2
-                                )}
-                              >
-                                <React.Fragment>
-                                  {currentItem.memory.usage
-                                    ? `${(currentItem.memory.usage / (1024 * 1024 * 1024)).toFixed(2)} GB`
-                                    : "--"}
-                                </React.Fragment>
-                              </div>
-                              <div
-                                className={classNames(
-                                  projectcss.all,
-                                  projectcss.__wab_text,
-                                  sty.text__z82WG
-                                )}
-                              >
-                                <React.Fragment>
-                                  {currentItem.ports === ""
-                                    ? "--"
-                                    : currentItem.ports}
-                                </React.Fragment>
-                              </div>
+                              </React.Fragment>
+                            </div>
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text__ybhF5
+                              )}
+                            >
+                              <React.Fragment>
+                                {currentItem.cpu_percent !== null
+                                  ? currentItem.cpu_percent.toFixed(0) + "% CPU"
+                                  : "--"}
+                              </React.Fragment>
+                            </div>
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text__hyM8
+                              )}
+                            >
+                              <React.Fragment>
+                                {currentItem.memory.usage
+                                  ? `${(currentItem.memory.usage / (1024 * 1024 * 1024)).toFixed(2)} GB`
+                                  : "--"}
+                              </React.Fragment>
+                            </div>
+                            <div
+                              className={classNames(
+                                projectcss.all,
+                                projectcss.__wab_text,
+                                sty.text___6Ex8J
+                              )}
+                            >
+                              <React.Fragment>
+                                {currentItem.ports === ""
+                                  ? "--"
+                                  : currentItem.ports}
+                              </React.Fragment>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </DataCtxReader__>
-          </DataFetcher>
+                        </div>
+                      );
+                    })
+                  }
+                </DataCtxReader__>
+              </DataFetcher>
+            </div>
+          </div>
         </div>
       </div>
     </React.Fragment>
@@ -794,9 +790,8 @@ function PlasmicHomepage__RenderFunc(props) {
 }
 
 const PlasmicDescendants = {
-  root: ["root", "httpRestApiFetcher", "menu", "h1", "button"],
-  httpRestApiFetcher: ["httpRestApiFetcher", "menu", "h1", "button"],
-  menu: ["menu"],
+  root: ["root", "timer", "h1", "button"],
+  timer: ["timer"],
   h1: ["h1"],
   button: ["button"]
 };
@@ -833,8 +828,7 @@ export const PlasmicHomepage = Object.assign(
   makeNodeComponent("root"),
   {
     // Helper components rendering sub-elements
-    httpRestApiFetcher: makeNodeComponent("httpRestApiFetcher"),
-    menu: makeNodeComponent("menu"),
+    timer: makeNodeComponent("timer"),
     h1: makeNodeComponent("h1"),
     button: makeNodeComponent("button"),
     // Metadata about props expected for PlasmicHomepage

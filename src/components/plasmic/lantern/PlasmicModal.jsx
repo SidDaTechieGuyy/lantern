@@ -176,6 +176,7 @@ function PlasmicModal__RenderFunc(props) {
                   className={classNames(
                     projectcss.all,
                     projectcss.h3,
+                    projectcss.h3__54HsY,
                     projectcss.__wab_text,
                     sty.h3___6BilQ
                   )}
