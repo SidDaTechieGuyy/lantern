@@ -282,9 +282,7 @@ function PlasmicHomepage__RenderFunc(props) {
                                 {(() => {
                                   try {
                                     return (
-                                      $ctx.fetchedData.quicklook.cpu.toFixed(
-                                        0
-                                      ) + "%"
+                                      $ctx.fetchedData.total.toFixed(0) + "%"
                                     );
                                   } catch (e) {
                                     if (
@@ -542,8 +540,7 @@ function PlasmicHomepage__RenderFunc(props) {
                             {(() => {
                               try {
                                 return (
-                                  $ctx.fetchedData.fs[0].percent.toFixed(1) +
-                                  "%"
+                                  $ctx.fetchedData[0].percent.toFixed(1) + "%"
                                 );
                               } catch (e) {
                                 if (
