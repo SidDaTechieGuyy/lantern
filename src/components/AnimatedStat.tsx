@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import CountUp from "react-countup";
 
 interface AnimatedStatProps {
-  glancesUrl: string;
-  endpoint: string;
-  dataKey: string;
+  glancesUrl?: string;        // 👈 made optional (not needed when using staticValue)
+  endpoint?: string;          // 👈 made optional
+  dataKey?: string;           // 👈 made optional
   suffix?: string;
   prefix?: string;
   decimals?: number;
@@ -13,6 +13,7 @@ interface AnimatedStatProps {
   label?: string;
   tick?: number;
   className?: string;
+  staticValue?: number;       // 👈 new
 }
 
 function extractValue(data: any, dataKey: string): number {
@@ -50,16 +51,24 @@ export function AnimatedStat({
   label = "",
   tick = 0,
   className,
+  staticValue,                // 👈 new
 }: AnimatedStatProps) {
-  const [value, setValue] = useState<number>(0);
+  const [value, setValue] = useState<number>(staticValue ?? 0);  // 👈 seed with staticValue if present
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(!( staticValue !== undefined)); // 👈 skip loading if staticValue
 
   useEffect(() => {
+    // 👇 if staticValue is provided, just use it directly, no fetch
+    if (staticValue !== undefined) {
+      setValue(staticValue / divisor);
+      setLoading(false);
+      return;
+    }
+
     if (!glancesUrl || !endpoint || !dataKey) return;
 
     const base = glancesUrl.replace(/\/$/, "");
-    const url = `${base}/${endpoint}`; // 👈 was `/api/3/${endpoint}`
+    const url = `${base}/${endpoint}`;
 
     const fetchData = async () => {
       try {
@@ -77,7 +86,7 @@ export function AnimatedStat({
     };
 
     fetchData();
-  }, [glancesUrl, endpoint, dataKey, divisor, tick]);
+  }, [glancesUrl, endpoint, dataKey, divisor, tick, staticValue]); // 👈 added staticValue
 
   if (loading) {
     return (
