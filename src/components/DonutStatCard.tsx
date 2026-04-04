@@ -11,12 +11,10 @@ interface DonutStatCardProps {
   className?: string;
   style?: React.CSSProperties;
   staticValue?: number;
-  filledColor?: string;
   emptyColor?: string;
   innerRadius?: number;
   outerRadius?: number;
   showValue?: boolean;
-  useGradient?: boolean;
   gradientStart?: string;
   gradientMid?: string;
   gradientEnd?: string;
@@ -88,12 +86,10 @@ export function DonutStatCard({
   className,
   style,
   staticValue,
-  filledColor = "#2dd4bf",
   emptyColor = "rgba(255,255,255,0.06)",
   innerRadius = 32,
   outerRadius = 44,
   showValue = true,
-  useGradient = true,
   gradientStart = "#2dd4bf",
   gradientMid = "#facc15",
   gradientEnd = "#ef4444",
@@ -136,10 +132,13 @@ export function DonutStatCard({
     fetchData();
   }, [glancesUrl, endpoint, dataKey, tick, staticValue]);
 
-  const donutData = [
-    { value: Math.min(animatedValue, 100) },
-    { value: Math.max(100 - animatedValue, 0) },
-  ];
+  // The filled arc: from 90° down by (value/100 * 360)°
+  const filledAngle = (Math.min(animatedValue, 100) / 100) * 360;
+  // The empty arc covers the rest
+  const emptyAngle = 360 - filledAngle;
+
+  const filledData = [{ value: filledAngle }, { value: emptyAngle }];
+  const fullRing = [{ value: 1 }];
 
   if (error) {
     return (
@@ -153,16 +152,23 @@ export function DonutStatCard({
   return (
     <div style={{ ...styles.wrapper, ...style }} className={className}>
       <div style={{ position: "relative", width: chartSize, height: chartSize }}>
-        <PieChart width={chartSize} height={chartSize}>
+
+        {/* ── Layer 1: full 360° gradient ring, always fully painted ── */}
+        <PieChart
+          width={chartSize}
+          height={chartSize}
+          style={{ position: "absolute", top: 0, left: 0 }}
+        >
           <defs>
-            <linearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            {/* conical-style gradient using linearGradient rotated around the circle */}
+            <linearGradient id="donutGradient" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%"   stopColor={gradientStart} />
-              <stop offset="70%"  stopColor={gradientMid} />
+              <stop offset="50%"  stopColor={gradientMid} />
               <stop offset="100%" stopColor={gradientEnd} />
             </linearGradient>
           </defs>
           <Pie
-            data={loading ? [{ value: 1 }] : donutData}
+            data={fullRing}
             cx={chartSize / 2 - 1}
             cy={chartSize / 2 - 1}
             innerRadius={innerRadius}
@@ -173,14 +179,32 @@ export function DonutStatCard({
             strokeWidth={0}
             isAnimationActive={false}
           >
-            {loading ? (
-              <Cell fill="rgba(255,255,255,0.08)" />
-            ) : (
-              <>
-                <Cell fill={useGradient ? "url(#donutGradient)" : filledColor} />
-                <Cell fill={emptyColor} />
-              </>
-            )}
+            <Cell fill="url(#donutGradient)" />
+          </Pie>
+        </PieChart>
+
+        {/* ── Layer 2: empty arc painted on top to cover the unused portion ── */}
+        <PieChart
+          width={chartSize}
+          height={chartSize}
+          style={{ position: "absolute", top: 0, left: 0 }}
+        >
+          <Pie
+            data={filledData}
+            cx={chartSize / 2 - 1}
+            cy={chartSize / 2 - 1}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
+            dataKey="value"
+            startAngle={90}
+            endAngle={-270}
+            strokeWidth={0}
+            isAnimationActive={false}
+          >
+            {/* first cell = filled portion = transparent (shows gradient below) */}
+            <Cell fill="transparent" />
+            {/* second cell = empty portion = covers gradient below */}
+            <Cell fill={loading ? "rgba(255,255,255,0.08)" : emptyColor} />
           </Pie>
         </PieChart>
 
