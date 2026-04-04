@@ -11,8 +11,8 @@ interface AnimatedStatProps {
   divisor?: number;
   duration?: number;
   label?: string;
-  refreshInterval?: number;
-  className?: string; // 👈 added
+  tick?: number;
+  className?: string;
 }
 
 function extractValue(data: any, dataKey: string): number {
@@ -36,8 +36,8 @@ export function AnimatedStat({
   divisor = 1,
   duration = 0.6,
   label = "",
-  refreshInterval = 2000,
-  className, // 👈 added
+  tick = 0,
+  className,
 }: AnimatedStatProps) {
   const [value, setValue] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function AnimatedStat({
     if (!glancesUrl || !endpoint || !dataKey) return;
 
     const base = glancesUrl.replace(/\/$/, "");
-    const url = `${base}/${endpoint}`; // 👈 was `/api/3/${endpoint}`
+    const url = `${base}/${endpoint}`;
 
     const fetchData = async () => {
       try {
@@ -64,14 +64,12 @@ export function AnimatedStat({
       }
     };
 
-    fetchData();
-    const interval = setInterval(fetchData, refreshInterval);
-    return () => clearInterval(interval);
-  }, [glancesUrl, endpoint, dataKey, divisor, refreshInterval]);
+    fetchData(); // 🔄 fires every time tick changes
+  }, [glancesUrl, endpoint, dataKey, divisor, tick]); // 👈 no more setInterval
 
   if (loading) {
     return (
-      <div style={styles.wrapper} className={className}> {/* 👈 added */}
+      <div style={styles.wrapper} className={className}>
         {label && <div style={styles.label}>{label}</div>}
         <div style={styles.loading}>...</div>
       </div>
@@ -80,7 +78,7 @@ export function AnimatedStat({
 
   if (error) {
     return (
-      <div style={styles.wrapper} className={className}> {/* 👈 added */}
+      <div style={styles.wrapper} className={className}>
         {label && <div style={styles.label}>{label}</div>}
         <div style={styles.error}>⚠ {error}</div>
       </div>
@@ -88,7 +86,7 @@ export function AnimatedStat({
   }
 
   return (
-    <div style={styles.wrapper} className={className}> {/* 👈 added */}
+    <div style={styles.wrapper} className={className}>
       {label && <div style={styles.label}>{label}</div>}
       <CountUp
         end={value}
