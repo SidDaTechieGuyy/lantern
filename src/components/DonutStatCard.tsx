@@ -15,8 +15,11 @@ interface DonutStatCardProps {
   emptyColor?: string;
   innerRadius?: number;
   outerRadius?: number;
-  size?: number;
-  showValue?: boolean; // 👈 new
+  showValue?: boolean;
+  useGradient?: boolean;
+  gradientStart?: string;
+  gradientMid?: string;
+  gradientEnd?: string;
 }
 
 function extractValue(data: any, dataKey: string): number {
@@ -89,16 +92,17 @@ export function DonutStatCard({
   emptyColor = "rgba(255,255,255,0.06)",
   innerRadius = 32,
   outerRadius = 44,
-  size = 100,
-  showValue = true, // 👈 new
+  showValue = true,
+  useGradient = true,
+  gradientStart = "#2dd4bf",
+  gradientMid = "#facc15",
+  gradientEnd = "#ef4444",
 }: DonutStatCardProps) {
   const [value, setValue] = useState<number>(staticValue ?? 0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(staticValue === undefined);
 
   const animatedValue = useSpringValue(value, duration);
-
-  // 👇 actual chart size is driven by outerRadius
   const chartSize = outerRadius * 2 + 10;
 
   useEffect(() => {
@@ -148,9 +152,15 @@ export function DonutStatCard({
 
   return (
     <div style={{ ...styles.wrapper, ...style }} className={className}>
-      {/* 👇 chartSize is now derived from outerRadius, size prop is gone */}
       <div style={{ position: "relative", width: chartSize, height: chartSize }}>
         <PieChart width={chartSize} height={chartSize}>
+          <defs>
+            <linearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor={gradientStart} />
+              <stop offset="70%"  stopColor={gradientMid} />
+              <stop offset="100%" stopColor={gradientEnd} />
+            </linearGradient>
+          </defs>
           <Pie
             data={loading ? [{ value: 1 }] : donutData}
             cx={chartSize / 2 - 1}
@@ -167,14 +177,13 @@ export function DonutStatCard({
               <Cell fill="rgba(255,255,255,0.08)" />
             ) : (
               <>
-                <Cell fill={filledColor} />
+                <Cell fill={useGradient ? "url(#donutGradient)" : filledColor} />
                 <Cell fill={emptyColor} />
               </>
             )}
           </Pie>
         </PieChart>
 
-        {/* 👇 only render if showValue is true */}
         {showValue && (
           <div style={styles.centerText}>
             {loading ? (
@@ -227,4 +236,3 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "0.75em",
   },
 };
-
