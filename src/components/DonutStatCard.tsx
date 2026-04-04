@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { PieChart, Pie, Cell } from "recharts";
 
 interface DonutStatCardProps {
   glancesUrl?: string;
@@ -47,11 +46,7 @@ function useSpringValue(target: number, duration: number) {
 
   useEffect(() => {
     if (animRef.current) cancelAnimationFrame(animRef.current);
-    startRef.current = {
-      from: display,
-      to: target,
-      startTime: performance.now(),
-    };
+    startRef.current = { from: display, to: target, startTime: performance.now() };
 
     const animate = (now: number) => {
       const elapsed = now - startRef.current.startTime;
@@ -60,21 +55,69 @@ function useSpringValue(target: number, duration: number) {
         progress < 0.5
           ? 4 * progress * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      const current =
-        startRef.current.from +
-        (startRef.current.to - startRef.current.from) * ease;
+      const current = startRef.current.from + (startRef.current.to - startRef.current.from) * ease;
       setDisplay(current);
       if (progress < 1) animRef.current = requestAnimationFrame(animate);
     };
 
     animRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
   }, [target, duration]);
 
   return display;
 }
+
+// Parse "#rrggbb" → [r, g, b]
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ];
+}
+
+// Interpolate between two [r,g,b] colors
+function lerpColor(a: [number, number, number], b: [number, number, number], t: number): string {
+  const r = Math.round(a[0] + (b[0] - a[0]) * t);
+  const g = Math.round(a[1] + (b[1] - a[1]) * t);
+  const b2 = Math.round(a[2] + (b[2] - a[2]) * t);
+  return `rgb(${r},${g},${b2})`;
+}
+
+// Get color at position 0–1 across start→mid→end
+function gradientColor(
+  t: number,
+  start: string,
+  mid: string,
+  end: string
+): string {
+  const s = hexToRgb(start);
+  const m = hexToRgb(mid);
+  const e = hexToRgb(end);
+  if (t < 0.5) return lerpColor(s, m, t / 0.5);
+  return lerpColor(m, e, (t - 0.5) / 0.5);
+}
+
+// Build an SVG arc path
+function describeArc(
+  cx: number,
+  cy: number,
+  r: number,
+  startAngle: number,
+  endAngle: number
+): string {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const x1 = cx + r * Math.cos(toRad(startAngle));
+  const y1 = cy + r * Math.sin(toRad(startAngle));
+  const x2 = cx + r * Math.cos(toRad(endAngle));
+  const y2 = cy + r * Math.sin(toRad(endAngle));
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
+}
+
+// How many segments to draw (more = smoother gradient)
+const SEGMENTS = 120;
 
 export function DonutStatCard({
   glancesUrl,
@@ -100,6 +143,10 @@ export function DonutStatCard({
 
   const animatedValue = useSpringValue(value, duration);
   const chartSize = outerRadius * 2 + 10;
+  const cx = chartSize / 2;
+  const cy = chartSize / 2;
+  const strokeWidth = outerRadius - innerRadius;
+  const arcRadius = (outerRadius + innerRadius) / 2;
 
   useEffect(() => {
     if (staticValue !== undefined) {
@@ -108,7 +155,6 @@ export function DonutStatCard({
       setError(null);
       return;
     }
-
     if (!glancesUrl || !endpoint || !dataKey) return;
 
     const base = glancesUrl.replace(/\/$/, "");
@@ -132,14 +178,6 @@ export function DonutStatCard({
     fetchData();
   }, [glancesUrl, endpoint, dataKey, tick, staticValue]);
 
-  // The filled arc: from 90° down by (value/100 * 360)°
-  const filledAngle = (Math.min(animatedValue, 100) / 100) * 360;
-  // The empty arc covers the rest
-  const emptyAngle = 360 - filledAngle;
-
-  const filledData = [{ value: filledAngle }, { value: emptyAngle }];
-  const fullRing = [{ value: 1 }];
-
   if (error) {
     return (
       <div style={{ ...styles.wrapper, ...style }} className={className}>
@@ -149,64 +187,74 @@ export function DonutStatCard({
     );
   }
 
+  // Total degrees filled
+  const filledDeg = (Math.min(animatedValue, 100) / 100) * 360;
+
+  // Build gradient arc segments (each small segment = 360/SEGMENTS degrees)
+  const segmentDeg = 360 / SEGMENTS;
+
+  // Start at top (−90°) going clockwise
+  const startAngleDeg = -90;
+
+  const gradientSegments = Array.from({ length: SEGMENTS }, (_, i) => {
+    const segStart = startAngleDeg + i * segmentDeg;
+    const segEnd = segStart + segmentDeg;
+    const t = i / (SEGMENTS - 1); // 0 at top, 1 at full circle
+    const color = gradientColor(t, gradientStart, gradientMid, gradientEnd);
+    return { segStart, segEnd, color };
+  });
+
   return (
     <div style={{ ...styles.wrapper, ...style }} className={className}>
       <div style={{ position: "relative", width: chartSize, height: chartSize }}>
+        <svg width={chartSize} height={chartSize}>
 
-        {/* ── Layer 1: full 360° gradient ring, always fully painted ── */}
-        <PieChart
-          width={chartSize}
-          height={chartSize}
-          style={{ position: "absolute", top: 0, left: 0 }}
-        >
-          <defs>
-            {/* conical-style gradient using linearGradient rotated around the circle */}
-            <linearGradient id="donutGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%"   stopColor={gradientStart} />
-              <stop offset="50%"  stopColor={gradientMid} />
-              <stop offset="100%" stopColor={gradientEnd} />
-            </linearGradient>
-          </defs>
-          <Pie
-            data={fullRing}
-            cx={chartSize / 2 - 1}
-            cy={chartSize / 2 - 1}
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
-            dataKey="value"
-            startAngle={90}
-            endAngle={-270}
-            strokeWidth={0}
-            isAnimationActive={false}
-          >
-            <Cell fill="url(#donutGradient)" />
-          </Pie>
-        </PieChart>
+          {/* ── Background full ring ── */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={arcRadius}
+            fill="none"
+            stroke={emptyColor}
+            strokeWidth={strokeWidth}
+          />
 
-        {/* ── Layer 2: empty arc painted on top to cover the unused portion ── */}
-        <PieChart
-          width={chartSize}
-          height={chartSize}
-          style={{ position: "absolute", top: 0, left: 0 }}
-        >
-          <Pie
-            data={filledData}
-            cx={chartSize / 2 - 1}
-            cy={chartSize / 2 - 1}
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
-            dataKey="value"
-            startAngle={90}
-            endAngle={-270}
-            strokeWidth={0}
-            isAnimationActive={false}
-          >
-            {/* first cell = filled portion = transparent (shows gradient below) */}
-            <Cell fill="transparent" />
-            {/* second cell = empty portion = covers gradient below */}
-            <Cell fill={loading ? "rgba(255,255,255,0.08)" : emptyColor} />
-          </Pie>
-        </PieChart>
+          {/* ── Gradient arc: only draw segments within the filled angle ── */}
+          {!loading && gradientSegments.map(({ segStart, segEnd, color }, i) => {
+            const segStartRel = segStart - startAngleDeg; // 0–360
+            const segEndRel = segEnd - startAngleDeg;
+
+            // Skip segments beyond filled amount
+            if (segStartRel >= filledDeg) return null;
+
+            // Clip last segment if partially filled
+            const clippedEnd = Math.min(segEndRel, filledDeg);
+            const clippedEndAngle = startAngleDeg + clippedEnd;
+
+            return (
+              <path
+                key={i}
+                d={describeArc(cx, cy, arcRadius, segStart, clippedEndAngle)}
+                fill="none"
+                stroke={color}
+                strokeWidth={strokeWidth}
+                strokeLinecap="butt"
+              />
+            );
+          })}
+
+          {/* ── Loading state ── */}
+          {loading && (
+            <circle
+              cx={cx}
+              cy={cy}
+              r={arcRadius}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={strokeWidth}
+            />
+          )}
+        </svg>
 
         {showValue && (
           <div style={styles.centerText}>
