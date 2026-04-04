@@ -1,5 +1,6 @@
 import { PlasmicCanvasHost, registerComponent } from "@plasmicapp/host";
 import { AnimatedStat } from "./components/AnimatedStat";
+import { DonutStatCard } from "./components/DonutStatCard";
 
 registerComponent(AnimatedStat, {
   name: "AnimatedStat",
@@ -15,8 +16,29 @@ registerComponent(AnimatedStat, {
     divisor: { type: "number", defaultValue: 1 },
     duration: { type: "number", defaultValue: 0.6 },
     label: { type: "string", defaultValue: "CPU Usage" },
-    tick: { type: "number", defaultValue: 0 }, // 👈 add this alongside the others
-    className: { type: "string" }, // 👈 added
+    tick: { type: "number", defaultValue: 0 },
+    className: { type: "string" },
+  },
+});
+
+registerComponent(DonutStatCard, {
+  name: "DonutStatCard",
+  importPath: "./components/DonutStatCard",
+  props: {
+    glancesUrl: { type: "string", defaultValue: "http://localhost:61208" },
+    endpoint: { type: "string", defaultValue: "cpu" },
+    dataKey: { type: "string", defaultValue: "total" },
+    duration: { type: "number", defaultValue: 0.6 },
+    label: { type: "string", defaultValue: "CPU" },
+    tick: { type: "number", defaultValue: 0 },
+    className: { type: "string" },
+    style: { type: "object" },
+    staticValue: { type: "number" },
+    filledColor: { type: "string", defaultValue: "#2dd4bf" },
+    emptyColor: { type: "string", defaultValue: "rgba(255,255,255,0.06)" },
+    innerRadius: { type: "number", defaultValue: 32 },
+    outerRadius: { type: "number", defaultValue: 44 },
+    size: { type: "number", defaultValue: 100 },
   },
 });
 
