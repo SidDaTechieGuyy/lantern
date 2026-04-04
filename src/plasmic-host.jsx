@@ -3,7 +3,7 @@ import { AnimatedStat } from "./components/AnimatedStat";
 
 registerComponent(AnimatedStat, {
   name: "AnimatedStat",
-  importPath: "./components/AnimatedStat", // 👈 needed for codegen
+  importPath: "./components/AnimatedStat",
   props: {
     glancesUrl: { type: "string", defaultValue: "http://localhost:61208" },
     endpoint: { type: "string", defaultValue: "cpu" },
@@ -15,6 +15,7 @@ registerComponent(AnimatedStat, {
     duration: { type: "number", defaultValue: 0.6 },
     label: { type: "string", defaultValue: "CPU Usage" },
     refreshInterval: { type: "number", defaultValue: 2000 },
+    className: { type: "string" }, // 👈 added
   },
 });
 
