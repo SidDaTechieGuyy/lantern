@@ -38,7 +38,7 @@ registerComponent(DonutStatCard, {
     emptyColor: { type: "string", defaultValue: "rgba(255,255,255,0.06)" },
     innerRadius: { type: "number", defaultValue: 32 },
     outerRadius: { type: "number", defaultValue: 44 },
-    size: { type: "number", defaultValue: 100 },
+    showValue: { type: "boolean", defaultValue: true }, // 👈 new
   },
 });
 
