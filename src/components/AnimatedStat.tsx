@@ -1,35 +1,22 @@
 import React, { useEffect, useState } from "react";
 import CountUp from "react-countup";
 
-// -------------------------------------------------------
-// Types
-// -------------------------------------------------------
-
 interface AnimatedStatProps {
-  glancesUrl: string;       // e.g. "http://localhost:61208"
-  endpoint: string;         // e.g. "cpu", "mem", "diskio", "network"
-  dataKey: string;          // e.g. "total" for CPU, "percent" for mem
-  suffix?: string;          // e.g. "%", " MB", " GB"
-  prefix?: string;          // e.g. "$"
-  decimals?: number;        // e.g. 1 for "42.3%"
-  divisor?: number;         // e.g. 1048576 to convert bytes → MB
-  duration?: number;        // countup animation duration in seconds
-  label?: string;           // e.g. "CPU Usage"
-  refreshInterval?: number; // in ms, default 2000
+  glancesUrl: string;
+  endpoint: string;
+  dataKey: string;
+  suffix?: string;
+  prefix?: string;
+  decimals?: number;
+  divisor?: number;
+  duration?: number;
+  label?: string;
+  refreshInterval?: number;
+  className?: string; // 👈 added
 }
 
-// -------------------------------------------------------
-// Helpers
-// -------------------------------------------------------
-
-/** Safely dig into a nested object using a dot-separated key path.
- *  e.g. dataKey="rx_bytes_rate" on an array picks index 0 automatically.
- */
 function extractValue(data: any, dataKey: string): number {
-  // If data is an array, pick the first element
   const target = Array.isArray(data) ? data[0] : data;
-  
-  // Support dot notation e.g. "cpu_percent"
   const keys = dataKey.split(".");
   let result = target;
   for (const k of keys) {
@@ -38,10 +25,6 @@ function extractValue(data: any, dataKey: string): number {
   }
   return typeof result === "number" ? result : parseFloat(result) || 0;
 }
-
-// -------------------------------------------------------
-// Component
-// -------------------------------------------------------
 
 export function AnimatedStat({
   glancesUrl,
@@ -54,6 +37,7 @@ export function AnimatedStat({
   duration = 0.6,
   label = "",
   refreshInterval = 2000,
+  className, // 👈 added
 }: AnimatedStatProps) {
   const [value, setValue] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +46,6 @@ export function AnimatedStat({
   useEffect(() => {
     if (!glancesUrl || !endpoint || !dataKey) return;
 
-    // Clean up trailing slash
     const base = glancesUrl.replace(/\/$/, "");
     const url = `${base}/api/3/${endpoint}`;
 
@@ -81,19 +64,14 @@ export function AnimatedStat({
       }
     };
 
-    // Fetch immediately, then on interval
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [glancesUrl, endpoint, dataKey, divisor, refreshInterval]);
-
-  // -------------------------------------------------------
-  // Render
-  // -------------------------------------------------------
 
   if (loading) {
     return (
-      <div style={styles.wrapper}>
+      <div style={styles.wrapper} className={className}> {/* 👈 added */}
         {label && <div style={styles.label}>{label}</div>}
         <div style={styles.loading}>...</div>
       </div>
@@ -102,7 +80,7 @@ export function AnimatedStat({
 
   if (error) {
     return (
-      <div style={styles.wrapper}>
+      <div style={styles.wrapper} className={className}> {/* 👈 added */}
         {label && <div style={styles.label}>{label}</div>}
         <div style={styles.error}>⚠ {error}</div>
       </div>
@@ -110,7 +88,7 @@ export function AnimatedStat({
   }
 
   return (
-    <div style={styles.wrapper}>
+    <div style={styles.wrapper} className={className}> {/* 👈 added */}
       {label && <div style={styles.label}>{label}</div>}
       <CountUp
         end={value}
@@ -118,15 +96,11 @@ export function AnimatedStat({
         prefix={prefix}
         decimals={decimals}
         duration={duration}
-        preserveValue={true} // 👈 animates from old → new value on each refresh
+        preserveValue={true}
       />
     </div>
   );
 }
-
-// -------------------------------------------------------
-// Styles (basic — override in Plasmic as needed)
-// -------------------------------------------------------
 
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
