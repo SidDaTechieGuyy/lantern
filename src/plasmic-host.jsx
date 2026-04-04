@@ -14,7 +14,7 @@ registerComponent(AnimatedStat, {
     divisor: { type: "number", defaultValue: 1 },
     duration: { type: "number", defaultValue: 0.6 },
     label: { type: "string", defaultValue: "CPU Usage" },
-    refreshInterval: { type: "number", defaultValue: 2000 },
+    tick: { type: "number", defaultValue: 0 }, // 👈 add this alongside the others
     className: { type: "string" }, // 👈 added
   },
 });
