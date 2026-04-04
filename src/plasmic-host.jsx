@@ -38,7 +38,11 @@ registerComponent(DonutStatCard, {
     emptyColor: { type: "string", defaultValue: "rgba(255,255,255,0.06)" },
     innerRadius: { type: "number", defaultValue: 32 },
     outerRadius: { type: "number", defaultValue: 44 },
-    showValue: { type: "boolean", defaultValue: true }, // 👈 new
+    showValue: { type: "boolean", defaultValue: true },
+    useGradient: { type: "boolean", defaultValue: true },
+    gradientStart: { type: "string", defaultValue: "#2dd4bf" },
+    gradientMid: { type: "string", defaultValue: "#facc15" },
+    gradientEnd: { type: "string", defaultValue: "#ef4444" },
   },
 });
 
