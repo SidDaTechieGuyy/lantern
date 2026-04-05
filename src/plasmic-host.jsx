@@ -48,6 +48,7 @@ registerComponent(DonutStatCard, {
 registerComponent(PortBadges, {
   name: "PortBadges",
   importPath: "@/components/PortBadges",
+  providesData: true,  // THIS is what was missing
   props: {
     ports: { type: "string", defaultValue: "443->443/tcp,80->80/tcp" },
     className: { type: "string" },
