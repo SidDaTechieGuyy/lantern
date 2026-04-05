@@ -4,7 +4,8 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 RUN sed -i 's|../../../../components/AnimatedStat|@/components/AnimatedStat|g' src/components/plasmic/lantern/PlasmicHomepage.jsx && \
-    sed -i 's|../../../../components/DonutStatCard|@/components/DonutStatCard|g' src/components/plasmic/lantern/PlasmicHomepage.jsx
+    sed -i 's|../../../../components/DonutStatCard|@/components/DonutStatCard|g' src/components/plasmic/lantern/PlasmicHomepage.jsx && \
+    sed -i 's|../../../../components/PortBadges|@/components/PortBadges|g' src/components/plasmic/lantern/PlasmicHomepage.jsx
 RUN npm run build
 
 FROM python:3.11-slim
