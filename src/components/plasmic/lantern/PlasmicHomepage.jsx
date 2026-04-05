@@ -23,8 +23,8 @@ import {
 } from "@plasmicapp/react-web/lib/host";
 import { usePlasmicDataSourceContext } from "@plasmicapp/data-sources-context";
 import { usePlasmicInvalidate } from "@plasmicapp/react-web/lib/data-sources";
-import { AnimatedStat } from "../../../../components/AnimatedStat"; // plasmic-import: dmctOjfjQVhJ/codeComponent
-import { DonutStatCard } from "../../../../components/DonutStatCard"; // plasmic-import: SgxQU-TsV9pU/codeComponent
+import { AnimatedStat } from "@/components/AnimatedStat"; // plasmic-import: dmctOjfjQVhJ/codeComponent
+import { DonutStatCard } from "@/components/DonutStatCard"; // plasmic-import: SgxQU-TsV9pU/codeComponent
 import { DataFetcher } from "@plasmicpkgs/plasmic-query";
 import Button from "../../Button"; // plasmic-import: q5yBY-eKZ0QK/component
 import { Timer } from "@plasmicpkgs/plasmic-basic-components";
