@@ -13,6 +13,7 @@ import {
   classNames,
   createPlasmicElementProxy,
   deriveRenderOpts,
+  get as $stateGet,
   set as $stateSet,
   useDollarState
 } from "@plasmicapp/react-web";
@@ -20,10 +21,13 @@ import {
   DataCtxReader as DataCtxReader__,
   useDataEnv
 } from "@plasmicapp/react-web/lib/host";
+import { usePlasmicDataSourceContext } from "@plasmicapp/data-sources-context";
+import { usePlasmicInvalidate } from "@plasmicapp/react-web/lib/data-sources";
 import { AnimatedStat } from "../../../../components/AnimatedStat"; // plasmic-import: dmctOjfjQVhJ/codeComponent
 import { DonutStatCard } from "../../../../components/DonutStatCard"; // plasmic-import: SgxQU-TsV9pU/codeComponent
 import { DataFetcher } from "@plasmicpkgs/plasmic-query";
 import Button from "../../Button"; // plasmic-import: q5yBY-eKZ0QK/component
+import { Timer } from "@plasmicpkgs/plasmic-basic-components";
 import { _useStyleTokens } from "./PlasmicStyleTokensProvider"; // plasmic-import: 54HsYifXcmbnw5veKzJ3R2/styleTokensProvider
 import "@plasmicapp/react-web/lib/plasmic.css";
 import projectcss from "./plasmic.module.css"; // plasmic-import: 54HsYifXcmbnw5veKzJ3R2/projectcss
@@ -124,6 +128,8 @@ function PlasmicHomepage__RenderFunc(props) {
     $q: {},
     $refs
   });
+  const dataSourcesCtx = usePlasmicDataSourceContext();
+  const plasmicInvalidate = usePlasmicInvalidate();
   const styleTokensClassNames = _useStyleTokens();
   return (
     <React.Fragment>
@@ -538,7 +544,7 @@ function PlasmicHomepage__RenderFunc(props) {
                     sty.text__hiOl9
                   )}
                 >
-                  {"DiSK"}
+                  {"DISK"}
                 </div>
                 <AnimatedStat
                   className={classNames(
@@ -965,6 +971,64 @@ function PlasmicHomepage__RenderFunc(props) {
               </DataCtxReader__>
             </DataFetcher>
           </div>
+          <Timer
+            data-plasmic-name={"timer"}
+            data-plasmic-override={overrides.timer}
+            className={classNames("__wab_instance", sty.timer)}
+            intervalSeconds={2}
+            isRunning={true}
+            onTick={async () => {
+              const $steps = {};
+              $steps["refreshData"] = true
+                ? (() => {
+                    const actionArgs = {
+                      queryInvalidation: ["plasmic_refresh_all"]
+                    };
+                    return (async ({ queryInvalidation }) => {
+                      if (!queryInvalidation) {
+                        return;
+                      }
+                      await plasmicInvalidate(queryInvalidation);
+                    })?.apply(null, [actionArgs]);
+                  })()
+                : undefined;
+              if (
+                $steps["refreshData"] != null &&
+                typeof $steps["refreshData"] === "object" &&
+                typeof $steps["refreshData"].then === "function"
+              ) {
+                $steps["refreshData"] = await $steps["refreshData"];
+              }
+              $steps["updateTick"] = true
+                ? (() => {
+                    const actionArgs = {
+                      variable: {
+                        objRoot: $state,
+                        variablePath: ["tick"]
+                      },
+                      operation: 2
+                    };
+                    return (({ variable, value, startIndex, deleteCount }) => {
+                      if (!variable) {
+                        return;
+                      }
+                      const { objRoot, variablePath } = variable;
+                      const oldValue = $stateGet(objRoot, variablePath);
+                      $stateSet(objRoot, variablePath, oldValue + 1);
+                      return oldValue + 1;
+                    })?.apply(null, [actionArgs]);
+                  })()
+                : undefined;
+              if (
+                $steps["updateTick"] != null &&
+                typeof $steps["updateTick"] === "object" &&
+                typeof $steps["updateTick"].then === "function"
+              ) {
+                $steps["updateTick"] = await $steps["updateTick"];
+              }
+            }}
+            runWhileEditing={false}
+          />
         </div>
       </div>
     </React.Fragment>
@@ -972,10 +1036,11 @@ function PlasmicHomepage__RenderFunc(props) {
 }
 
 const PlasmicDescendants = {
-  root: ["root", "h1", "httpRestApiFetcher", "button"],
+  root: ["root", "h1", "httpRestApiFetcher", "button", "timer"],
   h1: ["h1"],
   httpRestApiFetcher: ["httpRestApiFetcher", "button"],
-  button: ["button"]
+  button: ["button"],
+  timer: ["timer"]
 };
 
 function makeNodeComponent(nodeName) {
@@ -1013,6 +1078,7 @@ export const PlasmicHomepage = Object.assign(
     h1: makeNodeComponent("h1"),
     httpRestApiFetcher: makeNodeComponent("httpRestApiFetcher"),
     button: makeNodeComponent("button"),
+    timer: makeNodeComponent("timer"),
     // Metadata about props expected for PlasmicHomepage
     internalVariantProps: PlasmicHomepage__VariantProps,
     internalArgProps: PlasmicHomepage__ArgProps,
