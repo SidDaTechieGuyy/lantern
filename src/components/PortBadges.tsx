@@ -28,7 +28,7 @@ function parsePorts(raw: string): Port[] {
   });
 }
 
-export default function PortBadges({ ports, children, className }: PortBadgesProps) {
+function PortBadges({ ports, children, className }: PortBadgesProps) {
   const parsed = parsePorts(ports);
   return (
     <DataProvider name="ports" data={parsed}>
@@ -38,3 +38,6 @@ export default function PortBadges({ ports, children, className }: PortBadgesPro
 }
 
 PortBadges.displayName = "PortBadges";
+
+export default PortBadges;
+export { PortBadges };
