@@ -28,4 +28,33 @@ registerComponent(DonutStatCard, {
   props: {
     glancesUrl: { type: "string", defaultValue: "http://localhost:61208" },
     endpoint: { type: "string", defaultValue: "cpu" },
-    dataKey
+    dataKey: { type: "string", defaultValue: "total" },
+    duration: { type: "number", defaultValue: 0.6 },
+    label: { type: "string", defaultValue: "CPU" },
+    tick: { type: "number", defaultValue: 0 },
+    className: { type: "string" },
+    style: { type: "object" },
+    staticValue: { type: "number" },
+    emptyColor: { type: "string", defaultValue: "rgba(255,255,255,0.06)" },
+    innerRadius: { type: "number", defaultValue: 32 },
+    outerRadius: { type: "number", defaultValue: 44 },
+    showValue: { type: "boolean", defaultValue: true },
+    gradientStart: { type: "string", defaultValue: "#2dd4bf" },
+    gradientMid: { type: "string", defaultValue: "#facc15" },
+    gradientEnd: { type: "string", defaultValue: "#ef4444" },
+  },
+});
+
+registerComponent(PortBadges, {
+  name: "PortBadges",
+  importPath: "@/components/PortBadges",
+  props: {
+    ports: { type: "string", defaultValue: "443->443/tcp,80->80/tcp" },
+    className: { type: "string" },
+    badgeClassName: { type: "string" },
+  },
+});
+
+export default function PlasmicHost() {
+  return <PlasmicCanvasHost />;
+}
