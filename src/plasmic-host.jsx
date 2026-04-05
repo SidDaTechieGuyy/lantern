@@ -4,7 +4,7 @@ import { DonutStatCard } from "./components/DonutStatCard";
 
 registerComponent(AnimatedStat, {
   name: "AnimatedStat",
-  importPath: "./components/AnimatedStat",
+  importPath: "../AnimatedStat",
   props: {
     glancesUrl: { type: "string", defaultValue: "http://localhost:61208" },
     endpoint: { type: "string", defaultValue: "cpu" },
@@ -23,7 +23,7 @@ registerComponent(AnimatedStat, {
 
 registerComponent(DonutStatCard, {
   name: "DonutStatCard",
-  importPath: "./components/DonutStatCard",
+  importPath: "../DonutStatCard",
   props: {
     glancesUrl: { type: "string", defaultValue: "http://localhost:61208" },
     endpoint: { type: "string", defaultValue: "cpu" },
