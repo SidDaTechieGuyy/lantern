@@ -1,11 +1,17 @@
 import React from "react";
-import { DataProvider, repeatedElement, useSelector } from "@plasmicapp/host";
+import { DataProvider } from "@plasmicapp/host";
 
 interface Port {
   host: string;
   container: string;
   protocol: string;
-  label: string; // e.g. "443" or "80→443"
+  label: string;
+}
+
+interface PortBadgesProps {
+  ports: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
 function parsePorts(raw: string): Port[] {
@@ -22,22 +28,12 @@ function parsePorts(raw: string): Port[] {
   });
 }
 
-interface PortBadgesProps {
-  ports: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
 export default function PortBadges({ ports, children, className }: PortBadgesProps) {
   const parsed = parsePorts(ports);
   return (
-    <div className={className}>
-      {parsed.map((port, i) => (
-        <DataProvider key={i} name="port" data={port}>
-          {repeatedElement(i, children)}
-        </DataProvider>
-      ))}
-    </div>
+    <DataProvider name="ports" data={parsed}>
+      <div className={className ?? ""}>{children}</div>
+    </DataProvider>
   );
 }
 
