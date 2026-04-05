@@ -17,6 +17,7 @@
     "@plasmicapp/react-web": "^1.0.0",
     "@plasmicpkgs/antd5": "^0.0.337",
     "@plasmicpkgs/plasmic-basic-components": "^0.0.272",
+    "@plasmicpkgs/plasmic-embed-css": "^0.1.227",
     "@plasmicpkgs/plasmic-nav": "^0.0.213",
     "@plasmicpkgs/plasmic-query": "^0.0.262",
     "@plasmicpkgs/plasmic-rich-components": "^1.0.243",

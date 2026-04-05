@@ -26349,7 +26349,8 @@
         "YUiM7yqBWAqsh8KSnrdj7": "0.39.0",
         "ohDidvG9XsCeFumugENU3J": "6.36.0",
         "jkU633o1Cz7HrJdwdxhVHk": "16.19.0",
-        "caTPwKxj5ZrD9LQ7DMdK4Z": "3.48.0"
+        "caTPwKxj5ZrD9LQ7DMdK4Z": "3.48.0",
+        "8PtdGodUbexNYgkuyBUcWu": "3.33.0"
       },
       "lang": "js",
       "fileLocks": [
@@ -26360,7 +26361,7 @@
         },
         {
           "assetId": "54HsYifXcmbnw5veKzJ3R2",
-          "checksum": "d67943b6f663078fb398fcdf5aab2830",
+          "checksum": "556d625f62450cc1b087f3cf9a182db1",
           "type": "globalContexts"
         },
         {
@@ -26376,12 +26377,12 @@
         {
           "type": "renderModule",
           "assetId": "VO-JOznlsGEg",
-          "checksum": "2f3b1691d90041d2562168c0d31ba9bd"
+          "checksum": "1991c8207efae72c72a9b1d860ddd395"
         },
         {
           "type": "cssRules",
           "assetId": "VO-JOznlsGEg",
-          "checksum": "2f3b1691d90041d2562168c0d31ba9bd"
+          "checksum": "1991c8207efae72c72a9b1d860ddd395"
         },
         {
           "type": "renderModule",
@@ -26695,6 +26696,35 @@
         {
           "assetId": "caTPwKxj5ZrD9LQ7DMdK4Z",
           "checksum": "a64de52d4813f05feeef174d99168c7a",
+          "type": "styleTokensProvider"
+        }
+      ],
+      "codegenVersion": "0.0.3"
+    },
+    {
+      "projectId": "8PtdGodUbexNYgkuyBUcWu",
+      "version": "3.33.0",
+      "dependencies": {},
+      "lang": "js",
+      "fileLocks": [
+        {
+          "assetId": "8PtdGodUbexNYgkuyBUcWu",
+          "type": "projectCss",
+          "checksum": "1ba4aeba50d03a6e744a73a4e6995be9"
+        },
+        {
+          "assetId": "8PtdGodUbexNYgkuyBUcWu",
+          "checksum": "7374716521343de54f4a1551004b56d6",
+          "type": "globalContexts"
+        },
+        {
+          "assetId": "8PtdGodUbexNYgkuyBUcWu",
+          "checksum": "4a730a817c90d1d4e5cc48ca7ca0f665",
+          "type": "projectModule"
+        },
+        {
+          "assetId": "8PtdGodUbexNYgkuyBUcWu",
+          "checksum": "1067b7f90483f13e0d6bcbdffd99aa8c",
           "type": "styleTokensProvider"
         }
       ],
