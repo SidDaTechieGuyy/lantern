@@ -1,6 +1,6 @@
 services:
   lantern:
-    image: siddatechie/lantern:latest
+    build: .
     pid: host
     ports:
       - "7575:80"
