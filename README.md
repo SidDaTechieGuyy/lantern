@@ -1,25 +1,85 @@
-This is a React project bootstrapped with [`create-plasmic-app`](https://www.npmjs.com/package/create-plasmic-app).
+# 🏮 Lantern
 
-## Getting Started
+A lightweight, real-time homelab monitoring dashboard. Clean stats, live container visibility, and port badges — all in one minimal dark UI.
 
-First, run the development server:
+![Lantern Dashboard](screenshot.png)
 
-```bash
-npm run dev
+---
+
+## Features
+
+- **Live system stats** — CPU, RAM, and disk usage with animated donut rings and smooth number transitions
+- **Container monitoring** — All running Docker containers with per-container CPU, RAM, and port badges
+- **Clickable port badges** — Click any port badge to instantly open that service in a new tab
+- **Lightweight** — Static frontend served by Nginx, no Node.js runtime. Glances handles stats collection. Total RAM usage is a fraction of comparable dashboards
+- **Auto-refresh** — Stats update automatically every few seconds
+
+---
+
+## Quick Start
+
+Create a `docker-compose.yml`:
+
+```yaml
+services:
+  lantern:
+    image: siddatechie/lantern:latest
+    pid: host
+    ports:
+      - "7575:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
 ```
 
-Open your browser to see the result.
+Then run:
 
-You can start editing your project in Plasmic Studio. The page auto-updates as you edit the project.
+```bash
+docker compose up -d
+```
 
-## Learn More
+Open `http://your-server-ip:7575` in your browser.
 
-With Plasmic, you can enable non-developers on your team to publish pages and content into your website or app.
+---
 
-To learn more about Plasmic, take a look at the following resources:
+## Requirements
 
-- [Plasmic Website](https://www.plasmic.app/)
-- [Plasmic Documentation](https://docs.plasmic.app/learn/)
-- [Plasmic Community Forum](https://forum.plasmic.app/)
+- Docker
+- The container needs access to the host Docker socket (`/var/run/docker.sock`) for container visibility
+- `pid: host` is required for Glances to see host processes and container stats correctly
 
-You can check out [the Plasmic GitHub repository](https://github.com/plasmicapp/plasmic) - your feedback and contributions are welcome!
+---
+
+## Configuration
+
+No configuration needed. Lantern auto-discovers your Docker containers and reads system stats from the host via Glances.
+
+---
+
+## Tech Stack
+
+- **Frontend** — React + Vite (static files, served by Nginx)
+- **Stats** — [Glances](https://github.com/nicolargo/glances) REST API
+- **Container** — Nginx + Glances via supervisord, single Docker image
+
+---
+
+## Roadmap (v2)
+
+- Real-time streaming via SSE (no more polling)
+- psutil-based Python backend replacing Glances REST
+- Quick-access links / app shortcuts
+- Process monitor
+- Multi-server support
+
+---
+
+## Contributing
+
+PRs welcome. This is a solo homelab project so keep it simple and lightweight.
+
+---
+
+## License
+
+MIT
