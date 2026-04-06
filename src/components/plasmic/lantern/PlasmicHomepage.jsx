@@ -1042,7 +1042,9 @@ function PlasmicHomepage__RenderFunc(props) {
                                                 destination: (() => {
                                                   try {
                                                     return (
-                                                      window.location.origin +
+                                                      window.location.protocol +
+                                                      "//" +
+                                                      window.location.hostname +
                                                       ":" +
                                                       currentItem.host
                                                     );
