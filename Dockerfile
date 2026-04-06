@@ -6,7 +6,7 @@ COPY . .
 RUN npm run build
 
 FROM python:3.11-slim
-RUN pip install --no-cache-dir flask flask-cors gunicorn gevent psutil docker python-dateutil
+RUN pip install --no-cache-dir flask flask-cors gunicorn gevent psutil docker python-dateutil whitenoise
 
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
