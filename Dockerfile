@@ -3,24 +3,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN sed -i 's|../../../../components/AnimatedStat|@/components/AnimatedStat|g' src/components/plasmic/lantern/PlasmicHomepage.jsx && \
-    sed -i 's|../../../../components/DonutStatCard|@/components/DonutStatCard|g' src/components/plasmic/lantern/PlasmicHomepage.jsx && \
-    sed -i 's|../../../../components/PortBadges|@/components/PortBadges|g' src/components/plasmic/lantern/PlasmicHomepage.jsx
 RUN npm run build
 
 FROM python:3.11-slim
+RUN pip install --no-cache-dir flask flask-cors gunicorn gevent psutil docker python-dateutil
 
-RUN apt-get update && apt-get install -y \
-    supervisor \
-    nginx \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN /usr/local/bin/pip install "glances[web]" docker python-dateutil
-
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY nginx.conf /etc/nginx/sites-enabled/default
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY app.py .
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-n"]
+CMD ["gunicorn", "--worker-class", "gevent", "--workers", "1", "--bind", "0.0.0.0:80", "--timeout", "120", "app:app"]
