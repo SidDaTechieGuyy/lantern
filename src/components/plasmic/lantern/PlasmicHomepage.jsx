@@ -190,7 +190,7 @@ function PlasmicHomepage__RenderFunc(props) {
               sty.h1
             )}
           >
-            {"Lantern"}
+            {"Lantern \ud83c\udfee"}
           </h1>
           <div className={classNames(projectcss.all, sty.freeBox__yU1Ok)}>
             <div
