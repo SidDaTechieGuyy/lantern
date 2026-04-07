@@ -6,7 +6,7 @@ from flask import Flask, Response
 from flask_cors import CORS
 from whitenoise import WhiteNoise
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist', static_url_path='')
 CORS(app)
 app.wsgi_app = WhiteNoise(app.wsgi_app, root='dist/', index_file=True)
 
@@ -135,6 +135,7 @@ def health():
     return {'status': 'ok'}
 
 
+# ✅ The only change needed — catches unknown routes and hands them to React Router
 @app.errorhandler(404)
 def not_found(e):
     return app.send_static_file('index.html')
