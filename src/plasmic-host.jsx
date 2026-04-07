@@ -2,6 +2,7 @@ import { PlasmicCanvasHost, registerComponent } from "@plasmicapp/host";
 import { AnimatedStat } from "@/components/AnimatedStat";
 import { DonutStatCard } from "@/components/DonutStatCard";
 import PortBadges from "@/components/PortBadges";
+import { StatsProvider } from "@/components/StatsProvider";
 
 registerComponent(AnimatedStat, {
   name: "AnimatedStat",
@@ -53,6 +54,16 @@ registerComponent(PortBadges, {
     ports: { type: "string", defaultValue: "443->443/tcp,80->80/tcp" },
     className: { type: "string" },
     children: { type: "slot" },
+  },
+});
+
+registerComponent(StatsProvider, {
+  name: "StatsProvider",
+  importPath: "@/components/StatsProvider",
+  providesData: true,
+  props: {
+    children: { type: "slot" },
+    className: { type: "string" },
   },
 });
 
