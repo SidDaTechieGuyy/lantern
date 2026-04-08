@@ -12,18 +12,12 @@ import * as React from "react";
 import {
   classNames,
   createPlasmicElementProxy,
-  deriveRenderOpts,
-  get as $stateGet,
-  set as $stateSet,
-  useDollarState
+  deriveRenderOpts
 } from "@plasmicapp/react-web";
 import {
   DataCtxReader as DataCtxReader__,
   useDataEnv
 } from "@plasmicapp/react-web/lib/host";
-import { usePlasmicDataSourceContext } from "@plasmicapp/data-sources-context";
-import { usePlasmicInvalidate } from "@plasmicapp/react-web/lib/data-sources";
-import { Timer } from "@plasmicpkgs/plasmic-basic-components";
 import { StatsProvider } from "@/components/StatsProvider"; // plasmic-import: 1usApmODc_nZ/codeComponent
 import { AnimatedStat } from "@/components/AnimatedStat"; // plasmic-import: dmctOjfjQVhJ/codeComponent
 import { DonutStatCard } from "@/components/DonutStatCard"; // plasmic-import: SgxQU-TsV9pU/codeComponent
@@ -84,52 +78,6 @@ function PlasmicHomepage__RenderFunc(props) {
   const $ctx = useDataEnv?.() || {};
   const refsRef = React.useRef({});
   const $refs = refsRef.current;
-  const stateSpecs = React.useMemo(
-    () => [
-      {
-        path: "menuOpened",
-        type: "private",
-        variableType: "boolean",
-        initFunc: ({ $props, $state, $queries, $q, $ctx }) => false
-      },
-      {
-        path: "restApi",
-        type: "private",
-        variableType: "text",
-        initFunc: ({ $props, $state, $queries, $q, $ctx }) =>
-          (() => {
-            try {
-              return `${window.location.origin}/glances/api/4/`;
-            } catch (e) {
-              if (
-                e instanceof TypeError ||
-                e?.plasmicType === "PlasmicUndefinedDataError"
-              ) {
-                return ``;
-              }
-              throw e;
-            }
-          })()
-      },
-      {
-        path: "tick",
-        type: "private",
-        variableType: "number",
-        initFunc: ({ $props, $state, $queries, $q, $ctx }) => 0
-      }
-    ],
-
-    [$props, $ctx, $refs]
-  );
-  const $state = useDollarState(stateSpecs, {
-    $props,
-    $ctx,
-    $queries: {},
-    $q: {},
-    $refs
-  });
-  const dataSourcesCtx = usePlasmicDataSourceContext();
-  const plasmicInvalidate = usePlasmicInvalidate();
   const styleTokensClassNames = _useStyleTokens();
   return (
     <React.Fragment>
@@ -147,35 +95,6 @@ function PlasmicHomepage__RenderFunc(props) {
             styleTokensClassNames,
             sty.root
           )}
-          onLoad={async event => {
-            const $steps = {};
-            $steps["updateMenuOpened"] = true
-              ? (() => {
-                  const actionArgs = {
-                    variable: {
-                      objRoot: $state,
-                      variablePath: ["menuOpened"]
-                    },
-                    operation: 0
-                  };
-                  return (({ variable, value, startIndex, deleteCount }) => {
-                    if (!variable) {
-                      return;
-                    }
-                    const { objRoot, variablePath } = variable;
-                    $stateSet(objRoot, variablePath, value);
-                    return value;
-                  })?.apply(null, [actionArgs]);
-                })()
-              : undefined;
-            if (
-              $steps["updateMenuOpened"] != null &&
-              typeof $steps["updateMenuOpened"] === "object" &&
-              typeof $steps["updateMenuOpened"].then === "function"
-            ) {
-              $steps["updateMenuOpened"] = await $steps["updateMenuOpened"];
-            }
-          }}
         >
           <h1
             data-plasmic-name={"h1"}
@@ -190,65 +109,6 @@ function PlasmicHomepage__RenderFunc(props) {
           >
             {"Lantern \ud83c\udfee"}
           </h1>
-          <Timer
-            data-plasmic-name={"timer"}
-            data-plasmic-override={overrides.timer}
-            className={classNames("__wab_instance", sty.timer)}
-            intervalSeconds={2}
-            isRunning={true}
-            onTick={async () => {
-              const $steps = {};
-              $steps["refreshData"] = true
-                ? (() => {
-                    const actionArgs = {
-                      queryInvalidation: ["plasmic_refresh_all"]
-                    };
-                    return (async ({ queryInvalidation }) => {
-                      if (!queryInvalidation) {
-                        return;
-                      }
-                      await plasmicInvalidate(queryInvalidation);
-                    })?.apply(null, [actionArgs]);
-                  })()
-                : undefined;
-              if (
-                $steps["refreshData"] != null &&
-                typeof $steps["refreshData"] === "object" &&
-                typeof $steps["refreshData"].then === "function"
-              ) {
-                $steps["refreshData"] = await $steps["refreshData"];
-              }
-              $steps["updateTick"] = true
-                ? (() => {
-                    const actionArgs = {
-                      variable: {
-                        objRoot: $state,
-                        variablePath: ["tick"]
-                      },
-                      operation: 2
-                    };
-                    return (({ variable, value, startIndex, deleteCount }) => {
-                      if (!variable) {
-                        return;
-                      }
-                      const { objRoot, variablePath } = variable;
-                      const oldValue = $stateGet(objRoot, variablePath);
-                      $stateSet(objRoot, variablePath, oldValue + 1);
-                      return oldValue + 1;
-                    })?.apply(null, [actionArgs]);
-                  })()
-                : undefined;
-              if (
-                $steps["updateTick"] != null &&
-                typeof $steps["updateTick"] === "object" &&
-                typeof $steps["updateTick"].then === "function"
-              ) {
-                $steps["updateTick"] = await $steps["updateTick"];
-              }
-            }}
-            runWhileEditing={false}
-          />
-
           <StatsProvider
             data-plasmic-name={"statsProvider"}
             data-plasmic-override={overrides.statsProvider}
@@ -339,23 +199,8 @@ function PlasmicHomepage__RenderFunc(props) {
                           "__wab_instance",
                           sty.donutStatCard__pYs8
                         )}
-                        dataKey={"total"}
                         duration={0.6}
                         emptyColor={"rgba(255,255,255,0.06)"}
-                        endpoint={"cpu"}
-                        glancesUrl={(() => {
-                          try {
-                            return $state.restApi;
-                          } catch (e) {
-                            if (
-                              e instanceof TypeError ||
-                              e?.plasmicType === "PlasmicUndefinedDataError"
-                            ) {
-                              return undefined;
-                            }
-                            throw e;
-                          }
-                        })()}
                         gradientEnd={"#ef4444"}
                         gradientMid={"#facc15"}
                         gradientStart={"#2dd4bf"}
@@ -363,10 +208,9 @@ function PlasmicHomepage__RenderFunc(props) {
                         label={``}
                         outerRadius={60}
                         showValue={false}
-                        staticValue={$ctx.stats.cpu.percent}
-                        tick={(() => {
+                        value={(() => {
                           try {
-                            return $state.tick;
+                            return $ctx.stats.cpu.percent;
                           } catch (e) {
                             if (
                               e instanceof TypeError ||
@@ -500,11 +344,8 @@ function PlasmicHomepage__RenderFunc(props) {
                           "__wab_instance",
                           sty.donutStatCard__fa0Q5
                         )}
-                        dataKey={""}
                         duration={0.6}
                         emptyColor={"rgba(255,255,255,0.06)"}
-                        endpoint={""}
-                        glancesUrl={""}
                         gradientEnd={"#ef4444"}
                         gradientMid={"#facc15"}
                         gradientStart={"#2dd4bf"}
@@ -512,10 +353,9 @@ function PlasmicHomepage__RenderFunc(props) {
                         label={``}
                         outerRadius={60}
                         showValue={false}
-                        staticValue={$ctx.stats.mem.percent}
-                        tick={(() => {
+                        value={(() => {
                           try {
-                            return $state.tick;
+                            return $ctx.stats.mem.percent;
                           } catch (e) {
                             if (
                               e instanceof TypeError ||
@@ -649,11 +489,8 @@ function PlasmicHomepage__RenderFunc(props) {
                           "__wab_instance",
                           sty.donutStatCard__nzHaY
                         )}
-                        dataKey={""}
                         duration={0.3}
                         emptyColor={"rgba(255,255,255,0.06)"}
-                        endpoint={""}
-                        glancesUrl={""}
                         gradientEnd={"#ef4444"}
                         gradientMid={"#facc15"}
                         gradientStart={"#2dd4bf"}
@@ -661,10 +498,9 @@ function PlasmicHomepage__RenderFunc(props) {
                         label={``}
                         outerRadius={60}
                         showValue={false}
-                        staticValue={$ctx.stats.disk.percent}
-                        tick={(() => {
+                        value={(() => {
                           try {
-                            return $state.tick;
+                            return $ctx.stats.disk.percent;
                           } catch (e) {
                             if (
                               e instanceof TypeError ||
@@ -973,9 +809,8 @@ function PlasmicHomepage__RenderFunc(props) {
 }
 
 const PlasmicDescendants = {
-  root: ["root", "h1", "timer", "statsProvider"],
+  root: ["root", "h1", "statsProvider"],
   h1: ["h1"],
-  timer: ["timer"],
   statsProvider: ["statsProvider"]
 };
 
@@ -1012,7 +847,6 @@ export const PlasmicHomepage = Object.assign(
   {
     // Helper components rendering sub-elements
     h1: makeNodeComponent("h1"),
-    timer: makeNodeComponent("timer"),
     statsProvider: makeNodeComponent("statsProvider"),
     // Metadata about props expected for PlasmicHomepage
     internalVariantProps: PlasmicHomepage__VariantProps,

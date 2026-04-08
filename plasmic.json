@@ -27382,12 +27382,6 @@
           "componentImportPath": "@/components/DonutStatCard"
         },
         {
-          "id": "-sOR6cuubXQN",
-          "name": "PortBadges",
-          "displayName": "PortBadges",
-          "componentImportPath": "@/components/PortBadges"
-        },
-        {
           "id": "1usApmODc_nZ",
           "name": "StatsProvider",
           "displayName": "StatsProvider",
