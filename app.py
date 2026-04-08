@@ -34,6 +34,29 @@ def get_cpu_temp():
     return None
 
 
+def parse_ports(container) -> list:
+    seen = set()
+    ports = []
+    if not container.ports:
+        return ports
+    for container_port, bindings in container.ports.items():
+        proto = container_port.split('/')[1] if '/' in container_port else 'tcp'
+        cport = container_port.split('/')[0]
+        if bindings:
+            for b in bindings:
+                host_port = b.get('HostPort', cport)
+                key = f"{host_port}/{proto}"
+                if key not in seen:
+                    seen.add(key)
+                    ports.append(key)
+        else:
+            key = f"{cport}/{proto}"
+            if key not in seen:
+                seen.add(key)
+                ports.append(key)
+    return ports
+
+
 def watch_container(c):
     """Runs forever in its own thread, continuously updating the cache for one container."""
     name = c.name
@@ -82,18 +105,6 @@ def start_watching_containers():
     """Called once at startup — spawns a watcher thread per running container."""
     try:
         for c in docker_client.containers.list(all=True):
-            ports = []
-            if c.ports:
-                for container_port, bindings in c.ports.items():
-                    proto = container_port.split('/')[1] if '/' in container_port else 'tcp'
-                    cport = container_port.split('/')[0]
-                    if bindings:
-                        for b in bindings:
-                            host_port = b.get('HostPort', cport)
-                            ports.append(f"{host_port}/{proto}")
-                    else:
-                        ports.append(f"{cport}/{proto}")
-
             with cache_lock:
                 container_stats_cache[c.name] = {
                     'name': c.name,
@@ -101,7 +112,7 @@ def start_watching_containers():
                     'cpu': 0.0,
                     'mem_percent': 0.0,
                     'mem_gb': 0.0,
-                    'ports': ports,
+                    'ports': parse_ports(c),
                     'image': c.image.tags[0] if c.image.tags else 'unknown',
                 }
 
@@ -126,18 +137,6 @@ def refresh_container_list():
             # Add new containers
             for name, c in current.items():
                 if name not in cached_names:
-                    ports = []
-                    if c.ports:
-                        for container_port, bindings in c.ports.items():
-                            proto = container_port.split('/')[1] if '/' in container_port else 'tcp'
-                            cport = container_port.split('/')[0]
-                            if bindings:
-                                for b in bindings:
-                                    host_port = b.get('HostPort', cport)
-                                    ports.append(f"{host_port}/{proto}")
-                            else:
-                                ports.append(f"{cport}/{proto}")
-
                     with cache_lock:
                         container_stats_cache[name] = {
                             'name': c.name,
@@ -145,7 +144,7 @@ def refresh_container_list():
                             'cpu': 0.0,
                             'mem_percent': 0.0,
                             'mem_gb': 0.0,
-                            'ports': ports,
+                            'ports': parse_ports(c),
                             'image': c.image.tags[0] if c.image.tags else 'unknown',
                         }
 
